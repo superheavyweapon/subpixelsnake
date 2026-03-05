@@ -1,0 +1,60 @@
+/*
+JavaScript Snake
+By Patrick Gillespie
+http://patorjk.com/games/snake
+*/
+body {
+  margin: 0px;
+  padding: 0px;
+  background-color: #fff;
+}
+
+#game-area {
+  margin: 10px;
+  padding: 0px;
+}
+
+#game-area:focus {
+  outline: -webkit-focus-ring-color auto 1px;
+}
+
+#game-area {
+  outline-offset: 2px;
+}
+
+.arrow-button {
+  padding: 2rem;
+}
+
+.snake-snakebody-block {
+  margin: 0px;
+  padding: 0px;
+  mix-blend-mode: lighten;
+  position: absolute;
+}
+
+.snake-food-block {
+  margin: 0px;
+  padding: 0px;
+  background-color: #ff0000;
+  border: 0px solid #000080;
+  position: absolute;
+  mix-blend-mode: lighten;
+}
+
+.snake-playing-field {
+  margin: 0px;
+  padding: 0px;
+  position: absolute;
+  background-color: #000;
+  border: 0px solid #000;
+}
+
+.snake-game-container {
+  margin: 0px;
+  padding: 0px;
+  border-width: 0px;
+  border-style: none;
+  zoom: 1;
+  position: relative;
+}
