@@ -9,50 +9,24 @@
 <body>
 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
   <h1>Subpixel Snake</h1>
-  <h3 style="margin-top: 0">You may need a microscope</h3>
-  <div style="width: 32px; height: 32px">
-    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
-      <path d="m20 12-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8z"></path>
-    </svg>
-  </div>
+  <h3 style="margin-top: 0">WASD is Reversed (W=Down, S=Up, A=Right, D=Left)</h3>
   
   <div id="game-area" style="width: 500px; height: 1500px" tabindex="0"></div>
-  <div id="message" style="margin-top: 1rem; display: flex; gap: 2rem"></div>
 
   <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 2rem;">
-    <div style="margin-top: 1rem; display: flex; flex-direction: row; gap: 2rem; justify-content: center;">
-      <div style="display: flex; flex-direction: row">Length: <div id="snakeLength">1</div></div>
-      <div style="display: flex; flex-direction: row">High score: <div id="highScore">1</div></div>
+    <div style="display: flex; justify-content: center; gap: 2rem;">
+      <div>Length: <span id="snakeLength">1</span></div>
+      <div>High score: <span id="highScore">1</span></div>
     </div>
 
-    <div id="speed-section" style="display: flex; justify-content: center; gap: 0.5rem">
-      <label for="speed">Time between snake moves in milliseconds:</label>
-      <input id="speed" min="50" type="number"/>
+    <!-- REVERSE CHECKBOX -->
+    <div id="options-section" style="display: flex; justify-content: center;">
+      <input id="reverseWASD" type="checkbox" checked/>
+      <label for="reverseWASD" style="font-weight: bold; margin-left: 5px;">Enable Reversed WASD</label>
     </div>
 
-    <div id="zoom-section" style="display: flex; justify-content: center; gap: 0.5rem">
-      <label for="snake-zoom">Percent to zoom page:</label>
-      <input id="snake-zoom" min="1" type="number" value="100"/>
-    </div>
-
-    <div id="options-section" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-      <div>
-        <input id="useButtons" type="checkbox"/><label for="useButtons">Use buttons for arrow keys</label>
-      </div>
-      <div>
-        <input id="reverseKeys" type="checkbox"/><label for="reverseKeys" style="font-weight: bold; color: #d32f2f;">Reverse Arrow Keys</label>
-      </div>
-    </div>
-
-    <div id="dpr" style="display: flex; flex-direction: row; gap: 0.25rem; justify-content: center;">
-      Device pixel ratio: <div id="pixelRatio"></div>
-      <div id="ratioMessage" style="display: none; font-weight: bold;">(The ratio needs to be 1 for this to work)</div>
-    </div>
-
-    <div style="display: flex; flex-direction: row; gap: 0.25rem; justify-content: center;">
-      <div><input id="lab-color" name="color-type" type="radio" value="0"/><label for="lab-color">LAB Color</label></div>
-      <div><input checked id="srgb-color" name="color-type" type="radio" value="1"/><label for="srgb-color">sRGB Color</label></div>
-      <div><input id="sbgr-color" name="color-type" type="radio" value="2"/><label for="sbgr-color">sBGR Color</label></div>
+    <div style="display: flex; flex-direction: row; gap: 0.25rem; align-self: center;">
+      <a href="https://patorjk.com">patorjk.com</a>
     </div>
   </div>
 </div>
@@ -61,51 +35,50 @@
 <script src="./js/init.js" type="text/javascript"></script>
 
 <script>
-  const reverseMap = {
-    'ArrowUp': { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40 },
-    'ArrowDown': { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38 },
-    'ArrowLeft': { key: 'ArrowRight', code: 'ArrowRight', keyCode: 39 },
-    'ArrowRight': { key: 'ArrowLeft', code: 'ArrowLeft', keyCode: 37 }
+  // MAPPING: WASD to REVERSED Arrows
+  const wasdMap = {
+    'w': { key: 'ArrowDown', keyCode: 40 },
+    'W': { key: 'ArrowDown', keyCode: 40 },
+    's': { key: 'ArrowUp', keyCode: 38 },
+    'S': { key: 'ArrowUp', keyCode: 38 },
+    'a': { key: 'ArrowRight', keyCode: 39 },
+    'A': { key: 'ArrowRight', keyCode: 39 },
+    'd': { key: 'ArrowLeft', keyCode: 37 },
+    'D': { key: 'ArrowLeft', keyCode: 37 }
   };
 
-  // Intercept keydown at window level using 'true' for capture phase
+  // Intercept WASD in the capture phase
   window.addEventListener("keydown", (evt) => {
-    const isReversed = document.getElementById("reverseKeys").checked;
-    if (isReversed && reverseMap[evt.key]) {
+    const isReversed = document.getElementById("reverseWASD").checked;
+    
+    if (isReversed && wasdMap[evt.key]) {
       evt.stopImmediatePropagation();
       evt.preventDefault();
 
-      const data = reverseMap[evt.key];
-      // Dispatch a synthetic event to the focused game-area
+      const data = wasdMap[evt.key];
       const fakeEvt = new KeyboardEvent("keydown", {
         key: data.key,
-        code: data.code,
+        code: data.key,
         keyCode: data.keyCode,
         which: data.keyCode,
-        bubbles: true,
-        cancelable: true
+        bubbles: true
       });
+      
       document.getElementById("game-area").dispatchEvent(fakeEvt);
     }
   }, true);
 
+  // Standard focus and ratio logic
   const updateRatio = () => {
     let ratio = window.devicePixelRatio;
-    document.getElementById("pixelRatio").innerHTML = ratio;
-    document.getElementById("ratioMessage").style.display = (ratio !== 1) ? "block" : "none";
+    if(document.getElementById("pixelRatio")) document.getElementById("pixelRatio").innerHTML = ratio;
   };
   updateRatio();
   window.addEventListener("resize", updateRatio);
 
   window.addEventListener("keyup", (evt) => {
-    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(evt.key)) {
-      document.getElementById("game-area").focus();
-    }
-    if (evt.key === "0" && document.getElementById("playAgain")) {
-      document.getElementById("playAgain").click();
-    }
+    if (wasdMap[evt.key]) document.getElementById("game-area").focus();
   });
 </script>
-<script src="./js/general.js"></script>
 </body>
 </html>
