@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- http://patorjk.com -->
   <meta charset="utf-8"/>
   <title>Subpixel Snake: The Web's Smallest Game</title>
   <link href="./css/main-snake.css" id="style" rel="stylesheet" type="text/css"/>
@@ -39,9 +40,9 @@
       <div>
         <input id="useButtons" type="checkbox"/><label for="useButtons">Use buttons for arrow keys</label>
       </div>
-      <!-- NEW CHECKBOX ADDED HERE -->
+      <!-- REVERSE CHECKBOX -->
       <div>
-        <input id="reverseKeys" type="checkbox"/><label for="reverseKeys" style="font-weight: bold; color: #d32f2f;">Reverse Arrow Keys</label>
+        <input id="reverseKeys" type="checkbox"/><label for="reverseKeys" style="font-weight: bold; color: #d32f2f;">Reverse arrow key directions</label>
       </div>
     </div>
 
@@ -66,6 +67,40 @@
 <script src="./js/init.js" type="text/javascript"></script>
 
 <script>
+  // Setup mapping for reversed keys
+  const reverseMap = {
+    'ArrowUp': { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40 },
+    'ArrowDown': { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38 },
+    'ArrowLeft': { key: 'ArrowRight', code: 'ArrowRight', keyCode: 39 },
+    'ArrowRight': { key: 'ArrowLeft', code: 'ArrowLeft', keyCode: 37 }
+  };
+
+  // Intercept keydown in the CAPTURE phase to beat the internal snake.js logic
+  window.addEventListener("keydown", (evt) => {
+    const isReversed = document.getElementById("reverseKeys").checked;
+    
+    if (isReversed && reverseMap[evt.key]) {
+      // 1. Kill the original event so the game doesn't see it
+      evt.stopImmediatePropagation();
+      evt.preventDefault();
+
+      // 2. Dispatch a "fake" event with the opposite direction
+      const newKeyData = reverseMap[evt.key];
+      const fakeEvt = new KeyboardEvent("keydown", {
+        key: newKeyData.key,
+        code: newKeyData.code,
+        keyCode: newKeyData.keyCode,
+        which: newKeyData.keyCode,
+        bubbles: true,
+        cancelable: true
+      });
+
+      // Target the game area specifically
+      document.getElementById("game-area").dispatchEvent(fakeEvt);
+    }
+  }, true); // The 'true' here is vital for intercepting events early
+
+  // Original UI and Focus Logic
   const updateRatio = () => {
     let ratio = window.devicePixelRatio;
     document.getElementById("pixelRatio").innerHTML = ratio;
@@ -74,47 +109,14 @@
   updateRatio();
   window.addEventListener("resize", updateRatio);
 
-  // REVERSE KEY LOGIC
-  const reverseMap = {
-    'ArrowUp': 'ArrowDown',
-    'ArrowDown': 'ArrowUp',
-    'ArrowLeft': 'ArrowRight',
-    'ArrowRight': 'ArrowLeft'
-  };
-
-  // Intercept keydown before the game processes it
-  window.addEventListener("keydown", (evt) => {
-    const isReversed = document.getElementById("reverseKeys").checked;
-    
-    if (isReversed && reverseMap[evt.key]) {
-      evt.stopImmediatePropagation(); // Stop original event
-      evt.preventDefault();
-
-      // Dispatch new event with reversed key
-      const reversedKey = reverseMap[evt.key];
-      const newEvt = new KeyboardEvent("keydown", {
-        key: reversedKey,
-        code: reversedKey,
-        bubbles: true
-      });
-      evt.target.dispatchEvent(newEvt);
-    }
-  }, true); // "true" ensures this runs during the capture phase
-
   window.addEventListener("keyup", (evt) => {
     const theKeys = { ArrowLeft: true, ArrowRight: true, ArrowUp: true, ArrowDown: true };
     if (theKeys[evt.key]) {
       document.getElementById("game-area").focus();
     }
     if (evt.key === "0" && document.getElementById("playAgain")) {
-        document.getElementById("playAgain").click();
+      document.getElementById("playAgain").click();
     }
-  });
-</script>
-<script src="./js/general.js"></script>
-</body>
-</html>
-
   });
 </script>
 <script src="./js/general.js"></script>
