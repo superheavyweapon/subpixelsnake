@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- http://patorjk.com -->
   <meta charset="utf-8"/>
   <title>Subpixel Snake: The Web's Smallest Game</title>
   <link href="./css/main-snake.css" id="style" rel="stylesheet" type="text/css"/>
@@ -40,9 +39,8 @@
       <div>
         <input id="useButtons" type="checkbox"/><label for="useButtons">Use buttons for arrow keys</label>
       </div>
-      <!-- REVERSE CHECKBOX -->
       <div>
-        <input id="reverseKeys" type="checkbox"/><label for="reverseKeys" style="font-weight: bold; color: #d32f2f;">Reverse arrow key directions</label>
+        <input id="reverseKeys" type="checkbox"/><label for="reverseKeys" style="font-weight: bold; color: #d32f2f;">Reverse Arrow Keys</label>
       </div>
     </div>
 
@@ -56,10 +54,6 @@
       <div><input checked id="srgb-color" name="color-type" type="radio" value="1"/><label for="srgb-color">sRGB Color</label></div>
       <div><input id="sbgr-color" name="color-type" type="radio" value="2"/><label for="sbgr-color">sBGR Color</label></div>
     </div>
-
-    <div style="display: flex; flex-direction: row; gap: 0.25rem; align-self: center;">
-      <a href="https://patorjk.com">patorjk.com</a>
-    </div>
   </div>
 </div>
 
@@ -67,7 +61,6 @@
 <script src="./js/init.js" type="text/javascript"></script>
 
 <script>
-  // Setup mapping for reversed keys
   const reverseMap = {
     'ArrowUp': { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40 },
     'ArrowDown': { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38 },
@@ -75,32 +68,27 @@
     'ArrowRight': { key: 'ArrowLeft', code: 'ArrowLeft', keyCode: 37 }
   };
 
-  // Intercept keydown in the CAPTURE phase to beat the internal snake.js logic
+  // Intercept keydown at window level using 'true' for capture phase
   window.addEventListener("keydown", (evt) => {
     const isReversed = document.getElementById("reverseKeys").checked;
-    
     if (isReversed && reverseMap[evt.key]) {
-      // 1. Kill the original event so the game doesn't see it
       evt.stopImmediatePropagation();
       evt.preventDefault();
 
-      // 2. Dispatch a "fake" event with the opposite direction
-      const newKeyData = reverseMap[evt.key];
+      const data = reverseMap[evt.key];
+      // Dispatch a synthetic event to the focused game-area
       const fakeEvt = new KeyboardEvent("keydown", {
-        key: newKeyData.key,
-        code: newKeyData.code,
-        keyCode: newKeyData.keyCode,
-        which: newKeyData.keyCode,
+        key: data.key,
+        code: data.code,
+        keyCode: data.keyCode,
+        which: data.keyCode,
         bubbles: true,
         cancelable: true
       });
-
-      // Target the game area specifically
       document.getElementById("game-area").dispatchEvent(fakeEvt);
     }
-  }, true); // The 'true' here is vital for intercepting events early
+  }, true);
 
-  // Original UI and Focus Logic
   const updateRatio = () => {
     let ratio = window.devicePixelRatio;
     document.getElementById("pixelRatio").innerHTML = ratio;
@@ -110,8 +98,7 @@
   window.addEventListener("resize", updateRatio);
 
   window.addEventListener("keyup", (evt) => {
-    const theKeys = { ArrowLeft: true, ArrowRight: true, ArrowUp: true, ArrowDown: true };
-    if (theKeys[evt.key]) {
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(evt.key)) {
       document.getElementById("game-area").focus();
     }
     if (evt.key === "0" && document.getElementById("playAgain")) {
